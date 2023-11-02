@@ -10,7 +10,28 @@
 #' @keywords internal
 `%||%` <- function(lhs, rhs) if (!length(lhs) || is.null(lhs)) rhs else lhs
 
+#' magrittr pipe that works with pkg_ref and View()
+#'
+#' @param lhs Left-hand side
+#' @param rhs Right-hand side
+#' magrittr pipe that interoperates with View
+#'
+#' @name pipe
+#' @return an object same as \code{lhs} or \code{rhs}
+#' @keywords external
+`%>%` <- function(lhs, rhs) {
+  rhs_call <- substitute(rhs)
 
+  # Special handling for View()
+  if (identical(rhs_call, quote(View()))) {
+    View(lhs)
+    return(invisible(lhs))
+  }
+
+  rhs_call <- as.call(c(list(rhs_call[[1]], lhs), as.list(rhs_call)[-1]))
+
+  eval(rhs_call, envir = parent.frame())
+}
 
 #' Accessor for tools namespace
 #'
